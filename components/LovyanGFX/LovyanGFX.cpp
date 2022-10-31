@@ -16,15 +16,15 @@ Contributors:
  [tobozo](https://github.com/tobozo)
 /----------------------------------------------------------------------------*/
 
-#include "LGFXBase.hpp"
+#include "LovyanGFX.hpp"
 
-#include "../internal/limits.h"
-#include "../utility/miniz.h"
-#include "../utility/lgfx_pngle.h"
-#include "../utility/lgfx_qrcode.h"
-#include "../utility/lgfx_tjpgd.h"
-#include "../utility/lgfx_qoi.h"
-#include "../utility/pgmspace.h"
+#include "internal/limits.h"
+#include "utility/miniz.h"
+#include "utility/lgfx_pngle.h"
+#include "utility/lgfx_qrcode.h"
+#include "utility/lgfx_tjpgd.h"
+#include "utility/lgfx_qoi.h"
+#include "utility/pgmspace.h"
 #include "panel/Panel_Device.hpp"
 #include "misc/bitmap.hpp"
 
@@ -39,29 +39,29 @@ Contributors:
 #undef max
 #endif
 
-namespace lgfx
+namespace esphome
 {
- inline namespace v1
+ namespace LovyanGFX
  {
 //----------------------------------------------------------------------------
   static constexpr float deg_to_rad = 0.017453292519943295769236907684886;
   static constexpr uint8_t FP_SCALE = 16;
 
-  void LGFXBase::setColorDepth(color_depth_t depth)
+  void LovyanGFX::setColorDepth(color_depth_t depth)
   {
     _panel->setColorDepth(depth);
     _write_conv.setColorDepth(_panel->getWriteDepth());
     _read_conv.setColorDepth(_panel->getReadDepth());
   }
 
-  void LGFXBase::setRotation(uint_fast8_t rotation)
+  void LovyanGFX::setRotation(uint_fast8_t rotation)
   {
     if (_panel) _panel->setRotation(rotation);
     clearClipRect();
     clearScrollRect();
   }
 
-  void LGFXBase::setAddrWindow(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::setAddrWindow(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     if (_adjust_abs(x, w)||_adjust_abs(y, h)) return;
     if (x < 0) { w += x; x = 0; }
@@ -76,7 +76,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::setClipRect(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::setClipRect(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     if (x < 0) { w += x; x = 0; }
     if (w > width() - x)  w = width()  - x;
@@ -91,7 +91,7 @@ namespace lgfx
     _clip_b = y + h - 1;
   }
 
-  void LGFXBase::display(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::display(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     if (x < 0) { w += x; x = 0; }
     if (w > width() - x)  w = width()  - x;
@@ -102,7 +102,7 @@ namespace lgfx
     _panel->display(x, y, w, h);
   }
 
-  void LGFXBase::getClipRect(int32_t *x, int32_t *y, int32_t *w, int32_t *h)
+  void LovyanGFX::getClipRect(int32_t *x, int32_t *y, int32_t *w, int32_t *h)
   {
     *x = _clip_l;
     *w = _clip_r - *x + 1;
@@ -110,7 +110,7 @@ namespace lgfx
     *h = _clip_b - *y + 1;
   }
 
-  void LGFXBase::clearClipRect(void)
+  void LovyanGFX::clearClipRect(void)
   {
     _clip_l = 0;
     _clip_r = width() - 1;
@@ -118,7 +118,7 @@ namespace lgfx
     _clip_b = height() - 1;
   }
 
-  void LGFXBase::setScrollRect(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::setScrollRect(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     _adjust_abs(x, w);
     if (x < 0) { w += x; x = 0; }
@@ -135,7 +135,7 @@ namespace lgfx
     _sh = h;
   }
 
-  void LGFXBase::getScrollRect(int32_t *x, int32_t *y, int32_t *w, int32_t *h)
+  void LovyanGFX::getScrollRect(int32_t *x, int32_t *y, int32_t *w, int32_t *h)
   {
     *x = _sx;
     *y = _sy;
@@ -143,7 +143,7 @@ namespace lgfx
     *h = _sh;
   }
 
-  void LGFXBase::clearScrollRect(void)
+  void LovyanGFX::clearScrollRect(void)
   {
     _sx = 0;
     _sw = width();
@@ -151,7 +151,7 @@ namespace lgfx
     _sh = height();
   }
 
-  void LGFXBase::drawFastVLine(int32_t x, int32_t y, int32_t h)
+  void LovyanGFX::drawFastVLine(int32_t x, int32_t y, int32_t h)
   {
     _adjust_abs(y, h);
     startWrite();
@@ -159,7 +159,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::writeFastVLine(int32_t x, int32_t y, int32_t h)
+  void LovyanGFX::writeFastVLine(int32_t x, int32_t y, int32_t h)
   {
     if (x < _clip_l || x > _clip_r) return;
     auto ct = _clip_t;
@@ -171,7 +171,7 @@ namespace lgfx
     writeFillRectPreclipped(x, y, 1, h);
   }
 
-  void LGFXBase::drawFastHLine(int32_t x, int32_t y, int32_t w)
+  void LovyanGFX::drawFastHLine(int32_t x, int32_t y, int32_t w)
   {
     _adjust_abs(x, w);
     startWrite();
@@ -179,7 +179,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::writeFastHLine(int32_t x, int32_t y, int32_t w)
+  void LovyanGFX::writeFastHLine(int32_t x, int32_t y, int32_t w)
   {
     if (y < _clip_t || y > _clip_b) return;
     auto cl = _clip_l;
@@ -191,7 +191,7 @@ namespace lgfx
     writeFillRectPreclipped(x, y, w, 1);
   }
 
-  void LGFXBase::fillRect(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::fillRect(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     _adjust_abs(x, w);
     _adjust_abs(y, h);
@@ -200,7 +200,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::writeFillRect(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::writeFillRect(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     if (_clipping(x, y, w, h))
     {
@@ -208,7 +208,7 @@ namespace lgfx
     }
   }
 
-  void LGFXBase::drawRect(int32_t x, int32_t y, int32_t w, int32_t h)
+  void LovyanGFX::drawRect(int32_t x, int32_t y, int32_t w, int32_t h)
   {
     if (_adjust_abs(x, w)||_adjust_abs(y, h)) return;
     startWrite();
@@ -223,7 +223,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawCircle(int32_t x, int32_t y, int32_t r)
+  void LovyanGFX::drawCircle(int32_t x, int32_t y, int32_t r)
   {
     if ( r <= 0 ) {
       drawPixel(x, y);
@@ -257,7 +257,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawCircleHelper(int32_t x, int32_t y, int32_t r, uint_fast8_t cornername)
+  void LovyanGFX::drawCircleHelper(int32_t x, int32_t y, int32_t r, uint_fast8_t cornername)
   {
     if (r <= 0) return;
     int32_t f     = 1 - r;
@@ -295,14 +295,14 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::fillCircle(int32_t x, int32_t y, int32_t r) {
+  void LovyanGFX::fillCircle(int32_t x, int32_t y, int32_t r) {
     startWrite();
     writeFastHLine(x - r, y, (r << 1) + 1);
     fillCircleHelper(x, y, r, 3, 0);
     endWrite();
   }
 
-  void LGFXBase::fillCircleHelper(int32_t x, int32_t y, int32_t r, uint_fast8_t corners, int32_t delta)
+  void LovyanGFX::fillCircleHelper(int32_t x, int32_t y, int32_t r, uint_fast8_t corners, int32_t delta)
   {
     if (r <= 0) return;
 
@@ -335,7 +335,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawEllipse(int32_t x, int32_t y, int32_t rx, int32_t ry)
+  void LovyanGFX::drawEllipse(int32_t x, int32_t y, int32_t rx, int32_t ry)
   {
     if (ry == 0) {
       drawFastHLine(x - rx, y, (ry << 2) + 1);
@@ -384,7 +384,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::fillEllipse(int32_t x, int32_t y, int32_t rx, int32_t ry)
+  void LovyanGFX::fillEllipse(int32_t x, int32_t y, int32_t rx, int32_t ry)
   {
     if (ry == 0) {
       drawFastHLine(x - rx, y, (ry << 2) + 1);
@@ -429,7 +429,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
+  void LovyanGFX::drawRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
   {
     if (_adjust_abs(x, w)||_adjust_abs(y, h)) return;
     startWrite();
@@ -474,7 +474,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
+  void LovyanGFX::fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
   {
     if (_adjust_abs(x, w)||_adjust_abs(y, h)) return;
     startWrite();
@@ -506,7 +506,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
+  void LovyanGFX::drawLine(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
   {
     bool steep = abs(y1 - y0) > abs(x1 - x0);
 
@@ -584,7 +584,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawTriangle(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+  void LovyanGFX::drawTriangle(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
   {
     startWrite();
     drawLine(x0, y0, x1, y1);
@@ -593,7 +593,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::fillTriangle(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+  void LovyanGFX::fillTriangle(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
   {
     int32_t a, b;
 
@@ -677,7 +677,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawBezier( int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+  void LovyanGFX::drawBezier( int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
   {
     int32_t x = x0 - x1, y = y0 - y1;
     double t = x0 - 2 * x1 + x2, r;
@@ -713,7 +713,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::draw_bezier_helper( int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+  void LovyanGFX::draw_bezier_helper( int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
   {
     // Check if coordinates are sequential (replaces assert)
     if (((x2 >= x1 && x1 >= x0) || (x2 <= x1 && x1 <= x0))
@@ -760,7 +760,7 @@ namespace lgfx
     }
   }
 
-  void LGFXBase::drawBezier( int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3)
+  void LovyanGFX::drawBezier( int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3)
   {
     int32_t w = x0-x1;
     int32_t h = y0-y1;
@@ -823,7 +823,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::draw_gradient_line( int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t colorstart, uint32_t colorend )
+  void LovyanGFX::draw_gradient_line( int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t colorstart, uint32_t colorend )
   {
     if ( colorstart == colorend || (x0 == x1 && y0 == y1)) {
       setColor(colorstart);
@@ -874,7 +874,7 @@ namespace lgfx
 
   constexpr float LoAlphaTheshold = 1.0f / 32.0f;
   constexpr float HiAlphaTheshold = 1.0f - LoAlphaTheshold;
-  void LGFXBase::fillSmoothRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
+  void LovyanGFX::fillSmoothRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
   {
     startWrite();
     int32_t xs = 0;
@@ -918,7 +918,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::drawEllipseArc(int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float start, float end)
+  void LovyanGFX::drawEllipseArc(int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float start, float end)
   {
     if (r0x < r1x) std::swap(r0x, r1x);
     if (r0y < r1y) std::swap(r0y, r1y);
@@ -940,7 +940,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::fillEllipseArc(int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float start, float end)
+  void LovyanGFX::fillEllipseArc(int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float start, float end)
   {
     if (r0x < r1x) std::swap(r0x, r1x);
     if (r0y < r1y) std::swap(r0y, r1y);
@@ -959,7 +959,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::fill_arc_helper(int32_t cx, int32_t cy, int32_t oradius_x, int32_t iradius_x, int32_t oradius_y, int32_t iradius_y, float start, float end)
+  void LovyanGFX::fill_arc_helper(int32_t cx, int32_t cy, int32_t oradius_x, int32_t iradius_x, int32_t oradius_y, int32_t iradius_y, float start, float end)
   {
     float s_cos = (cosf(start * deg_to_rad));
     float e_cos = (cosf(end * deg_to_rad));
@@ -1044,7 +1044,7 @@ namespace lgfx
     } while (++y <= ye);
   }
 
-  void LGFXBase::draw_bitmap(int32_t x, int32_t y, const uint8_t *bitmap, int32_t w, int32_t h, uint32_t fg_rawcolor, uint32_t bg_rawcolor)
+  void LovyanGFX::draw_bitmap(int32_t x, int32_t y, const uint8_t *bitmap, int32_t w, int32_t h, uint32_t fg_rawcolor, uint32_t bg_rawcolor)
   {
     if (w < 1 || h < 1) return;
     setRawColor(fg_rawcolor);
@@ -1074,7 +1074,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::draw_xbitmap(int32_t x, int32_t y, const uint8_t *bitmap, int32_t w, int32_t h, uint32_t fg_rawcolor, uint32_t bg_rawcolor)
+  void LovyanGFX::draw_xbitmap(int32_t x, int32_t y, const uint8_t *bitmap, int32_t w, int32_t h, uint32_t fg_rawcolor, uint32_t bg_rawcolor)
   {
     if (w < 1 || h < 1) return;
     setRawColor(fg_rawcolor);
@@ -1104,7 +1104,7 @@ namespace lgfx
     endWrite();
   }
 
-  pixelcopy_t LGFXBase::create_pc_gray(const uint8_t *image, lgfx::color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
+  pixelcopy_t LovyanGFX::create_pc_gray(const uint8_t *image, lgfx::color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
   {
     pixelcopy_t pc;
     pc.src_data = image;
@@ -1124,7 +1124,7 @@ namespace lgfx
     return pc;
   }
 
-  void LGFXBase::push_grayimage(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *image, color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
+  void LovyanGFX::push_grayimage(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *image, color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
   {
     pixelcopy_t pc = create_pc_gray(image, depth, fore_rgb888, back_rgb888);
     pc.src_width = w;
@@ -1132,19 +1132,19 @@ namespace lgfx
     pushImage(x, y, w, h, &pc, false);
   }
 
-  void LGFXBase::push_grayimage_rotate_zoom(float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y, int32_t w, int32_t h, const uint8_t* image, color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
+  void LovyanGFX::push_grayimage_rotate_zoom(float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y, int32_t w, int32_t h, const uint8_t* image, color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
   {
     pixelcopy_t pc = create_pc_gray(image, depth, fore_rgb888, back_rgb888);
     push_image_rotate_zoom(dst_x, dst_y, src_x, src_y, angle, zoom_x, zoom_y, w, h, &pc);
   }
 
-  void LGFXBase::push_grayimage_affine(const float* matrix, int32_t w, int32_t h, const uint8_t *image, color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
+  void LovyanGFX::push_grayimage_affine(const float* matrix, int32_t w, int32_t h, const uint8_t *image, color_depth_t depth, uint32_t fore_rgb888, uint32_t back_rgb888)
   {
     pixelcopy_t pc = create_pc_gray(image, depth, fore_rgb888, back_rgb888);
     push_image_affine(matrix, w, h, &pc);
   }
 
-  void LGFXBase::pushImage(int32_t x, int32_t y, int32_t w, int32_t h, pixelcopy_t *param, bool use_dma)
+  void LovyanGFX::pushImage(int32_t x, int32_t y, int32_t w, int32_t h, pixelcopy_t *param, bool use_dma)
   {
     uint32_t x_mask = 7 >> (param->src_bits >> 1);
     param->src_bitwidth = (w + x_mask) & (~x_mask);
@@ -1165,7 +1165,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::make_rotation_matrix(float* result, float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y)
+  void LovyanGFX::make_rotation_matrix(float* result, float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y)
   {
     float rad = fmodf(angle, 360) * deg_to_rad;
     float sin_f = sinf(rad);
@@ -1192,21 +1192,21 @@ namespace lgfx
     return true;
   }
 
-  void LGFXBase::push_image_rotate_zoom(float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y, int32_t w, int32_t h, pixelcopy_t* pc)
+  void LovyanGFX::push_image_rotate_zoom(float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y, int32_t w, int32_t h, pixelcopy_t* pc)
   {
     float matrix[6];
     make_rotation_matrix(matrix, dst_x + 0.5f, dst_y + 0.5f, src_x + 0.5f, src_y + 0.5f, angle, zoom_x, zoom_y);
     push_image_affine(matrix, w, h, pc);
   }
 
-  void LGFXBase::push_image_rotate_zoom_aa(float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y, int32_t w, int32_t h, pixelcopy_t* pc)
+  void LovyanGFX::push_image_rotate_zoom_aa(float dst_x, float dst_y, float src_x, float src_y, float angle, float zoom_x, float zoom_y, int32_t w, int32_t h, pixelcopy_t* pc)
   {
     float matrix[6];
     make_rotation_matrix(matrix, dst_x + 0.5f, dst_y + 0.5f, src_x + 0.5f, src_y + 0.5f, angle, zoom_x, zoom_y);
     push_image_affine_aa(matrix, w, h, pc);
   }
 
-  void LGFXBase::push_image_affine(const float* matrix, int32_t w, int32_t h, pixelcopy_t* pc)
+  void LovyanGFX::push_image_affine(const float* matrix, int32_t w, int32_t h, pixelcopy_t* pc)
   {
     pc->no_convert = false;
     pc->src_height = h;
@@ -1216,7 +1216,7 @@ namespace lgfx
     push_image_affine(matrix, pc);
   }
 
-  void LGFXBase::push_image_affine_aa(const float* matrix, int32_t w, int32_t h, pixelcopy_t* pc)
+  void LovyanGFX::push_image_affine_aa(const float* matrix, int32_t w, int32_t h, pixelcopy_t* pc)
   {
     pc->no_convert = false;
     pc->src_height = h;
@@ -1248,7 +1248,7 @@ namespace lgfx
     push_image_affine_aa(matrix, pc, &pc_post);
   }
 
-  void LGFXBase::fillAffine(const float matrix[6], int32_t w, int32_t h)
+  void LovyanGFX::fillAffine(const float matrix[6], int32_t w, int32_t h)
   {
     int32_t min_y = matrix[3] * (w << FP_SCALE);
     int32_t max_y = matrix[4] * (h << FP_SCALE);
@@ -1307,7 +1307,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::push_image_affine(const float* matrix, pixelcopy_t* pc)
+  void LovyanGFX::push_image_affine(const float* matrix, pixelcopy_t* pc)
   {
     int32_t min_y = matrix[3] * (pc->src_width  << FP_SCALE);
     int32_t max_y = matrix[4] * (pc->src_height << FP_SCALE);
@@ -1374,7 +1374,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::push_image_affine_aa(const float* matrix, pixelcopy_t* pc, pixelcopy_t* pc2)
+  void LovyanGFX::push_image_affine_aa(const float* matrix, pixelcopy_t* pc, pixelcopy_t* pc2)
   {
     int32_t min_y = matrix[3] * (pc->src_width  << FP_SCALE);
     int32_t max_y = matrix[4] * (pc->src_height << FP_SCALE);
@@ -1450,12 +1450,12 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::readRect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t* data)
+  void LovyanGFX::readRect(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t* data)
   {
     pixelcopy_t p(nullptr, rgb332_t::depth, _read_conv.depth, false, getPalette());
     read_rect(x, y, w, h, data, &p);
   }
-  void LGFXBase::readRect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t* data)
+  void LovyanGFX::readRect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t* data)
   {
     pixelcopy_t p(nullptr, swap565_t::depth, _read_conv.depth, false, getPalette());
     if (_swapBytes && !_palette_count && _read_conv.depth >= 8) {
@@ -1464,7 +1464,7 @@ namespace lgfx
     }
     read_rect(x, y, w, h, data, &p);
   }
-  void LGFXBase::readRect(int32_t x, int32_t y, int32_t w, int32_t h, void* data)
+  void LovyanGFX::readRect(int32_t x, int32_t y, int32_t w, int32_t h, void* data)
   {
     pixelcopy_t p(nullptr, bgr888_t::depth, _read_conv.depth, false, getPalette());
     if (_swapBytes && !_palette_count && _read_conv.depth >= 8) {
@@ -1474,7 +1474,7 @@ namespace lgfx
     read_rect(x, y, w, h, data, &p);
   }
 
-  void LGFXBase::scroll(int_fast16_t dx, int_fast16_t dy)
+  void LovyanGFX::scroll(int_fast16_t dx, int_fast16_t dy)
   {
     setColor(_base_rgb888);
     int32_t w  = _sw - abs(dx);
@@ -1500,7 +1500,7 @@ namespace lgfx
     endWrite();
   }
 
-  void LGFXBase::copyRect(int32_t dst_x, int32_t dst_y, int32_t w, int32_t h, int32_t src_x, int32_t src_y)
+  void LovyanGFX::copyRect(int32_t dst_x, int32_t dst_y, int32_t w, int32_t h, int32_t src_x, int32_t src_y)
   {
     auto wid = width();
     if (src_x < dst_x) { if (src_x < 0) { w += src_x; dst_x -= src_x; src_x = 0; } if (w > wid  - dst_x)  w = wid  - dst_x; }
@@ -1515,7 +1515,7 @@ namespace lgfx
     _panel->copyRect(dst_x, dst_y, w, h, src_x, src_y);
   }
 
-  void LGFXBase::read_rect(int32_t x, int32_t y, int32_t w, int32_t h, void* dst, pixelcopy_t* param)
+  void LovyanGFX::read_rect(int32_t x, int32_t y, int32_t w, int32_t h, void* dst, pixelcopy_t* param)
   {
     _adjust_abs(x, w);
     if (x < 0) { w += x; x = 0; }
@@ -1546,7 +1546,7 @@ namespace lgfx
     } while (lx <= rx);
   }
 
-  void LGFXBase::floodFill(int32_t x, int32_t y)
+  void LovyanGFX::floodFill(int32_t x, int32_t y)
   {
     if (x < _clip_l || x > _clip_r || y < _clip_t || y > _clip_b) return;
     bgr888_t target;
@@ -1737,7 +1737,7 @@ namespace lgfx
     return buf;
   }
 
-  uint16_t LGFXBase::decodeUTF8(uint8_t c)
+  uint16_t LovyanGFX::decodeUTF8(uint8_t c)
   {
     // 7 bit Unicode Code Point
     if (!(c & 0x80)) {
@@ -1783,7 +1783,7 @@ namespace lgfx
     return c; // fall-back to extended ASCII
   }
 
-  int32_t LGFXBase::fontHeight(const IFont* font) const
+  int32_t LovyanGFX::fontHeight(const IFont* font) const
   {
     FontMetrics fm;
     font->getDefaultMetric(&fm);
@@ -1791,7 +1791,7 @@ namespace lgfx
     return (fm.height * sy) >> 16;
   }
 
-  int32_t LGFXBase::fontWidth(const IFont* font) const
+  int32_t LovyanGFX::fontWidth(const IFont* font) const
   {
     FontMetrics fm;
     font->getDefaultMetric(&fm);
@@ -1799,7 +1799,7 @@ namespace lgfx
     return (fm.width * sx) >> 16;
   }
 
-  int32_t LGFXBase::textLength(const char *string, int32_t width)
+  int32_t LovyanGFX::textLength(const char *string, int32_t width)
   {
     if (!string || !string[0]) return 0;
 
@@ -1829,7 +1829,7 @@ namespace lgfx
     return string - str;
   }
 
-  int32_t LGFXBase::textWidth(const char *string, const IFont* font)
+  int32_t LovyanGFX::textWidth(const char *string, const IFont* font)
   {
     auto metrics = _font_metrics;
     if (font == nullptr)
@@ -1844,7 +1844,7 @@ namespace lgfx
     return text_width(string, font, &metrics);
   }
 
-  int32_t LGFXBase::text_width(const char *string, const IFont* font, FontMetrics* metrics)
+  int32_t LovyanGFX::text_width(const char *string, const IFont* font, FontMetrics* metrics)
   {
     if (!string || !string[0]) return 0;
 
@@ -1874,21 +1874,21 @@ namespace lgfx
   }
 
 
-  size_t LGFXBase::drawNumber(long long_num, int32_t poX, int32_t poY, const IFont* font)
+  size_t LovyanGFX::drawNumber(long long_num, int32_t poX, int32_t poY, const IFont* font)
   {
     constexpr size_t len = 8 * sizeof(long) + 1;
     char buf[len];
     return drawString(numberToStr(long_num, buf, len, 10), poX, poY, font);
   }
 
-  size_t LGFXBase::drawFloat(float floatNumber, uint8_t dp, int32_t poX, int32_t poY, const IFont* font)
+  size_t LovyanGFX::drawFloat(float floatNumber, uint8_t dp, int32_t poX, int32_t poY, const IFont* font)
   {
     size_t len = 14 + dp;
     auto buf = (char*)alloca(len);
     return drawString(floatToStr(floatNumber, buf, len, dp), poX, poY, font);
   }
 
-  size_t LGFXBase::drawChar(uint16_t uniCode, int32_t x, int32_t y, uint8_t font)
+  size_t LovyanGFX::drawChar(uint16_t uniCode, int32_t x, int32_t y, uint8_t font)
   {
     if (_font == fontdata[font]) return drawChar(uniCode, x, y);
     int32_t dummy_filled_x = 0;
@@ -1897,7 +1897,7 @@ namespace lgfx
     return fontdata[font]->drawChar(this, x, y, uniCode, &_text_style, &metrics, dummy_filled_x);
   }
 
-  size_t LGFXBase::draw_string(const char *string, int32_t x, int32_t y, textdatum_t datum, const IFont* font)
+  size_t LovyanGFX::draw_string(const char *string, int32_t x, int32_t y, textdatum_t datum, const IFont* font)
   {
     auto metrics = _font_metrics;
     if (font == nullptr)
@@ -1988,7 +1988,7 @@ namespace lgfx
     return sumX;
   }
 
-  size_t LGFXBase::write(uint8_t utf8)
+  size_t LovyanGFX::write(uint8_t utf8)
   {
     if (utf8 == '\r') return 1;
     int32_t sy = 65536 * _text_style.size_y;
@@ -2064,14 +2064,14 @@ namespace lgfx
     return 1;
   }
 
-  size_t LGFXBase::printNumber(unsigned long n, uint8_t base)
+  size_t LovyanGFX::printNumber(unsigned long n, uint8_t base)
   {
     size_t len = 8 * sizeof(long) + 1;
     auto buf = (char*)alloca(len);
     return write(numberToStr(n, buf, len, base));
   }
 
-  size_t LGFXBase::printFloat(double number, uint8_t digits)
+  size_t LovyanGFX::printFloat(double number, uint8_t digits)
   {
     size_t len = 14 + digits;
     auto buf = (char*)alloca(len);
@@ -2079,7 +2079,7 @@ namespace lgfx
   }
 
 #if defined (LGFX_PRINTF_ENABLED)
-  size_t LGFXBase::printf(const char * __restrict format, ...)
+  size_t LovyanGFX::printf(const char * __restrict format, ...)
   {
     va_list arg;
     va_start(arg, format);
@@ -2090,7 +2090,7 @@ namespace lgfx
   }
 #endif
 
-  size_t LGFXBase::vprintf(const char* __restrict format, va_list arg)
+  size_t LovyanGFX::vprintf(const char* __restrict format, va_list arg)
   {
     char loc_buf[64];
     char * temp = loc_buf;
@@ -2116,7 +2116,7 @@ namespace lgfx
     return len;
   }
 
-  void LGFXBase::setFont(const IFont* font)
+  void LovyanGFX::setFont(const IFont* font)
   {
     if (_font == font) return;
 
@@ -2130,13 +2130,13 @@ namespace lgfx
   }
 
   /// load VLW font
-  bool LGFXBase::loadFont(const uint8_t* array)
+  bool LovyanGFX::loadFont(const uint8_t* array)
   {
     _font_data.set(array);
     return load_font(&_font_data);
   }
 
-  bool LGFXBase::load_font(lgfx::DataWrapper* data)
+  bool LovyanGFX::load_font(lgfx::DataWrapper* data)
   {
     this->unloadFont();
     bool result = false;
@@ -2168,12 +2168,12 @@ namespace lgfx
     return result;
   }
 
-  void LGFXBase::unloadFont(void)
+  void LovyanGFX::unloadFont(void)
   {
     if (_runtime_font.get() != nullptr) { setFont(&fonts::Font0); }
   }
 
-  void LGFXBase::showFont(uint32_t td)
+  void LovyanGFX::showFont(uint32_t td)
   {
     int_fast16_t x = 0;
     int_fast16_t y = 0;
@@ -2202,7 +2202,7 @@ namespace lgfx
     this->fillScreen(this->_text_style.back_rgb888);
   }
 
-  void LGFXBase::setAttribute(attribute_t attr_id, uint8_t param) {
+  void LovyanGFX::setAttribute(attribute_t attr_id, uint8_t param) {
     switch (attr_id) {
     case cp437_switch:
       _text_style.cp437 = param;
@@ -2218,7 +2218,7 @@ namespace lgfx
     }
   }
 
-  uint8_t LGFXBase::getAttribute(attribute_t attr_id) {
+  uint8_t LovyanGFX::getAttribute(attribute_t attr_id) {
     switch (attr_id) {
       case cp437_switch: return _text_style.cp437;
       case utf8_switch: return _text_style.utf8;
@@ -2229,7 +2229,7 @@ namespace lgfx
 
 //----------------------------------------------------------------------------
 
-  void LGFXBase::qrcode(const char *string, int32_t x, int32_t y, int32_t w, uint8_t version) {
+  void LovyanGFX::qrcode(const char *string, int32_t x, int32_t y, int32_t w, uint8_t version) {
     if (w == -1) {
       w = std::min(width(), height()) * 9 / 10;
     }
@@ -2383,7 +2383,7 @@ namespace lgfx
     }
   };
 
-  bool LGFXBase::draw_bmp(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
+  bool LovyanGFX::draw_bmp(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
   {
     prepareTmpTransaction(data);
     bitmap_header_t bmpdata;
@@ -2558,7 +2558,7 @@ namespace lgfx
     return 1;
   }
 
-  bool LGFXBase::draw_jpg(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
+  bool LovyanGFX::draw_jpg(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
   {
     prepareTmpTransaction(data);
     draw_jpg_info_t drawinfo;
@@ -2885,7 +2885,7 @@ namespace lgfx
     }
   }
 
-  bool LGFXBase::draw_png(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
+  bool LovyanGFX::draw_png(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
   {
     pngle_t *pngle = lgfx_pngle_new();
     if (pngle == nullptr) { return false; }
@@ -2948,7 +2948,7 @@ namespace lgfx
   }
 
 
-  bool LGFXBase::draw_qoi(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
+  bool LovyanGFX::draw_qoi(DataWrapper* data, int32_t x, int32_t y, int32_t maxWidth, int32_t maxHeight, int32_t offX, int32_t offY, float zoom_x, float zoom_y, datum_t datum)
   {
     qoi_t *qoi = lgfx_qoi_new();
     if (qoi == nullptr) { return false; }
@@ -3026,7 +3026,7 @@ namespace lgfx
     return pImage;
   }
 
-  void* LGFXBase::createPng(size_t* datalen, int32_t x, int32_t y, int32_t w, int32_t h)
+  void* LovyanGFX::createPng(size_t* datalen, int32_t x, int32_t y, int32_t w, int32_t h)
   {
     if (_adjust_abs(x, w)||_adjust_abs(y, h)) return nullptr;
     if (x < 0) { w += x; x = 0; }
@@ -3049,7 +3049,7 @@ namespace lgfx
 
 //----------------------------------------------------------------------------
 
-  void LGFXBase::prepareTmpTransaction(DataWrapper* data)
+  void LovyanGFX::prepareTmpTransaction(DataWrapper* data)
   {
     if (data->need_transaction && isBusShared())
     {
